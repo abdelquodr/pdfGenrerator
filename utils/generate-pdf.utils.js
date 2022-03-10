@@ -1533,42 +1533,347 @@ const data = {
   ]
 }
 
-const buildTable = (doc) => {
+const buildTable = (doc, cellTop, cellHeight, leftText, rightText, isLast) => {
+  const cellBase = cellTop + cellHeight;
   doc
-  .save()
-  .moveTo(100, 150)
-  .lineTo(100, 250)
-  .lineTo(200, 250)
-  .fill('#FF3300');
+  .strokeColor('gray', .3)
+  // .fillColor('gray', .1)
+  .moveTo(36, cellBase)
+  .lineTo(36, cellTop)
+  .lineTo(564, cellTop)
+  .lineTo(564, cellBase)
+  .stroke()
+  .strokeColor('gray', isLast ? .3 : 1)
+  .moveTo(564, cellBase)
+  .lineTo(36, cellBase)
+  .stroke()
+  .strokeColor('gray', 1)
+  .moveTo(300, cellTop)
+  .lineTo(300, cellBase)
+  .stroke()
+  .text(leftText, 48, cellTop + 6)
+  .text(rightText, 312, cellTop + 6);
+}
+
+// build small Table
+const buildSmallTable = (doc, tableRowData, line, tableTop, i) => {
+  const anotherline= line * 20;
+  const rowTop = tableTop + anotherline;
+  doc
+  .strokeColor('gray', .3)
+  .moveDown(3, 0) 
+  .fontSize(9)
+  .text(i + ': ' + tableRowData.tranDate, 46, rowTop) 
+  .text(tableRowData.valDate, 130, rowTop)  
+  .text(tableRowData.des, 200, rowTop) 
+  .text(tableRowData.refNo, 340, rowTop)
+  .text(tableRowData.debit, 420, rowTop)
+  .text(tableRowData.credit, 460, rowTop)
+  .text(tableRowData.balance, 510, rowTop)
 }
 
 const generatePDF = () => {
   const doc = new PDFDocument({ margin: 30, size: 'A4' });
-  doc.pipe(fs.createWriteStream(path.join(process.cwd(), "myfile.pdf")));
-  doc.image(path.join(process.cwd(), "utils", "logo.png"), 36, 36, {
-    width: 64,
-    height: 64
+  doc.pipe(fs.createWriteStream(path.join(process.cwd(), "statement_of_account.pdf")));
+  doc.image(path.join(process.cwd(), "utils", "logo copy.png"), 36, 36, {
+    width: 100,
+    height: 40
   });
   doc.opacity(.3);
-  doc.image(path.join(process.cwd(), "utils", "logo.png"), 250, 400, {
-    width: 64,
-    height: 64,
+  doc.image(path.join(process.cwd(), "utils", "logo copy.png"), 250, 400, {
+    width: 100,
+    height: 40,
     align: 'center',
     valign: 'center',
   });
   doc.opacity(1);
-  doc.fontSize(16);
+  doc.fontSize(12);
+  doc.font("./font/Poppins-Medium.ttf")
   doc.text(`
     Sterling Towers
     20,Marina Lagos Island
     Lagos State
     Nigeria
     Switchresolution@sterling.ng
-  `, 320, 16);
-  buildTable(doc);
+  `, 360, 16);
+  
+  doc.opacity(1);
+  doc.fontSize(12);
+  doc.font("./font/Poppins-Medium.ttf")
+  doc.text(`
+    Benjamin Osagie
+
+    20, Sherwood street, London
+    United Kingdom
+  `, 36, 120);
+
+  doc.opacity(1);
+  // doc.fontSize(16);
+  // doc.font("./font/Poppins-Bold.ttf")
+  // doc.text(`
+  //   DOLLAR STATEMENT OF ACCOUNT
+  // `,);
+  
+  doc.font("./font/Poppins-Medium.ttf")
+  doc.fontSize(11);
+  const entries = [{
+    leftText: "Statement Date: 01/10/2022",
+    rightText: "Opening Balance: $80",
+  }, {
+    leftText: "Period Covered: 01/10/2022 to 01/11/2022",
+    rightText: "Total Credit Amount: $10.25",
+  },
+  {
+    leftText: "Currency:  Dollar",
+    rightText: "Total Debit Amount: $10.25",
+  },
+  {
+    leftText: "Account Number: 1002340010 ",
+    rightText: "Closing Balance: $10.25",
+  },
+  {
+    leftText: "Account Type: Dom Account",
+    rightText: "No of Transaction: 4",
+  }
+];
+  const tableTop = 200;
+  const cellHeight = 24;
+  for (let i = 0; i < entries.length; i++) {
+    const entry = entries[i];
+    buildTable(doc, tableTop + (cellHeight * i), cellHeight, entry.leftText, entry.rightText, i === entries.length - 1);
+  }
+  doc.fontSize(9);
+  const transactionData = {
+    tableHeader: ['Transaction Date', 'Value Date', 'Description', 'Reference No', 'Debit', 'Credit', 'Balance'],
+    tableData: [
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-Feb-2022', des: 'Micheal Johnson Payment', refNo: 'EUR/002/340', debit: '20.00', credit: '10.00', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Credit fee', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+      { tranDate: '02-jan-2022', valDate: '02-jan-2022', des: 'Utility bills', refNo: 'EUR/002/340', debit: '20.00', credit: ' ', balance: '60.45' },
+    ]
+  }
+  doc.moveDown(5, 0)
+  .strokeColor('black', 0)
+  .fillColor('gray', 0.3)
+  .lineTo(36, 342)
+  .lineTo(564, 342)
+  .lineTo(564, 364)
+  .lineTo(36, 364)
+  .lineTo(36, 342)
+  .fillAndStroke()
+  .fillColor('black', .8)
+  .text(transactionData.tableHeader[0], 46, 350)
+  .fill()
+  .text(transactionData.tableHeader[1], 130, 350)  
+  .text(transactionData.tableHeader[2], 200, 350) 
+  .text(transactionData.tableHeader[3], 340, 350)
+  .text(transactionData.tableHeader[4], 420, 350)
+  .text(transactionData.tableHeader[5], 460, 350)
+  .text(transactionData.tableHeader[6], 510, 350)
+  .fillColor('#000', 1 )
+  for (let i = 0; i < transactionData.tableData.length; i++) {
+    const iMinus22 = i - 22;
+    const isFirstPage = i < 22;
+    if (i === 22) {
+      doc.addPage({ margin: 30, size: 'A4' });
+    } else if (iMinus22 % 39 === 0) {
+      doc.addPage({ margin: 30, size: 'A4' });
+    }
+    const entry = transactionData.tableData[i];
+    buildSmallTable(doc, entry, isFirstPage ? i % 22 : iMinus22 % 39, isFirstPage ? 370 : 30, i);
+  }
+
   doc.end();
 
   return doc;
 };
+
+
+
+
 
 module.exports = { generatePDF };
